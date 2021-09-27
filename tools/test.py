@@ -71,6 +71,7 @@ def parse_args():
         default=0.5,
         help='Opacity of painted segmentation map. In (0, 1] range.')
     parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--fold', type=int, default=-1)
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -79,6 +80,8 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+
 
     assert args.out or args.eval or args.format_only or args.show \
         or args.show_dir, \
@@ -106,6 +109,21 @@ def main():
         cfg.data.test.pipeline[1].flip = True
     cfg.model.pretrained = None
     cfg.data.test.test_mode = True
+
+
+    # setup for cross fold validation
+    if args.fold != -1:
+        if args.work_dir is not None:
+            args.work_dir = args.work_dir.format(args.fold)
+        if args.checkpoint is not None:
+            args.checkpoint = args.checkpoint.format(args.fold)
+        if args.show_dir is not None:
+            args.show_dir = args.show_dir.format(args.fold)
+        cfg.data.train.split = cfg.data.train.split.format(args.fold)
+        cfg.data.val.split = cfg.data.val.split.format(args.fold)
+        cfg.data.test.split = cfg.data.test.split.format(args.fold)
+        cfg.evaluation.pre_eval = False
+
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -186,7 +204,8 @@ def main():
             args.show_dir,
             False,
             args.opacity,
-            pre_eval=args.eval is not None and not eval_on_format_results,
+            # pre_eval=args.eval is not None and not eval_on_format_results,
+            pre_eval=False,
             format_only=args.format_only or eval_on_format_results,
             format_args=eval_kwargs)
     else:
@@ -200,7 +219,8 @@ def main():
             args.tmpdir,
             args.gpu_collect,
             False,
-            pre_eval=args.eval is not None and not eval_on_format_results,
+            # pre_eval=args.eval is not None and not eval_on_format_results,
+            pre_eval=False,
             format_only=args.format_only or eval_on_format_results,
             format_args=eval_kwargs)
 

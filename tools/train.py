@@ -56,6 +56,7 @@ def parse_args():
         default='none',
         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--fold', type=int, default=-1)
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -90,6 +91,13 @@ def main():
     else:
         cfg.gpu_ids = range(1) if args.gpus is None else range(args.gpus)
 
+    # setup for cross fold validation
+    if args.fold != -1:
+        cfg.work_dir = cfg.work_dir.format(args.fold)
+        cfg.data.train.split = cfg.data.train.split.format(args.fold)
+        cfg.data.val.split = cfg.data.val.split.format(args.fold)
+        cfg.data.test.split = cfg.data.test.split.format(args.fold)
+
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
@@ -107,7 +115,8 @@ def main():
     # init the logger before other steps
     timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
     log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
-    logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
+
+    logger = get_root_logger(log_file=log_file, log_level=cfg.log_level, split=args.fold)
 
     # init the meta dict to record some important information such as
     # environment info and seed, which will be logged
@@ -174,6 +183,42 @@ def main():
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)
+
+    if args.fold != -1:
+        eval_best(cfg.work_dir, logger.handlers[1].baseFilename, 'mIoU')
+
+def eval_best(work_dir,log_filename, metric):
+    iteration = 0
+    best_metric = -float('inf')
+    latest_iteration = 0
+    with open(log_filename) as f:
+        for line in f.readlines():
+            if not line.startswith('2021'):
+                continue
+            parse_line = line.strip().split(' ')
+            if len(parse_line) < 8:
+                continue
+            if parse_line[7] == 'Saving':
+                iteration = int(parse_line[10])
+                latest_iteration = iteration
+            if parse_line[7].startswith(metric):
+                current_metric = float(parse_line[7].split(':')[1])
+                if current_metric > best_metric:
+                    mmcv.symlink(f'iter_{iteration}.pth', osp.join(work_dir, 'eval_best.pth'))
+                    best_metric = current_metric
+    with open(log_filename) as f:
+        for line in f.readlines():
+            if not line.startswith('202'):
+                continue
+            parse_line = line.strip().split(' ')
+            if len(parse_line) < 8:
+                continue
+            if parse_line[7] == 'Saving':
+                iteration = int(parse_line[10])
+            if parse_line[7].startswith(metric):
+                current_metric = float(parse_line[7].split(':')[1])
+                if current_metric != best_metric and iteration != latest_iteration:
+                    os.remove(osp.join(work_dir, f'iter_{iteration}.pth'))
 
 
 if __name__ == '__main__':

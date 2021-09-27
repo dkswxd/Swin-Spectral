@@ -106,6 +106,15 @@ def single_gpu_test(model,
         if show or out_dir:
             img_tensor = data['img'][0]
             img_metas = data['img_metas'][0].data[0]
+
+            if img_tensor.shape[1] != 3:
+                if 'channel_select' in img_metas[0].keys():
+                    channel_to_show = [img_metas[0]['channel_select'].index(i) for i in img_metas[0]['channel_to_show']]
+                    img_tensor = img_tensor[:,channel_to_show,::]
+                    for meta in img_metas:
+                        meta['img_norm_cfg']['mean'] = meta['img_norm_cfg']['mean'][channel_to_show]
+                        meta['img_norm_cfg']['std'] = meta['img_norm_cfg']['std'][channel_to_show]
+
             imgs = tensor2imgs(img_tensor, **img_metas[0]['img_norm_cfg'])
             assert len(imgs) == len(img_metas)
 
