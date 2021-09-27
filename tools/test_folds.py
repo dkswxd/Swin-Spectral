@@ -112,17 +112,16 @@ def main():
 
 
         # setup for cross fold validation
-        if args.fold != -1:
-            if args.work_dir is not None:
-                args.work_dir = args.work_dir.format(fold)
-            if args.checkpoint is not None:
-                args.checkpoint = args.checkpoint.format(fold)
-            if args.show_dir is not None:
-                args.show_dir = args.show_dir.format(fold)
-            cfg.data.train.split = cfg.data.train.split.format(fold)
-            cfg.data.val.split = cfg.data.val.split.format(fold)
-            cfg.data.test.split = cfg.data.test.split.format(fold)
-            cfg.evaluation.pre_eval = False
+        if args.work_dir is not None:
+            args.work_dir = args.work_dir.format(fold)
+        if args.checkpoint is not None:
+            args.checkpoint = args.checkpoint.format(fold)
+        if args.show_dir is not None:
+            args.show_dir = args.show_dir.format(fold)
+        cfg.data.train.split = cfg.data.train.split.format(fold)
+        cfg.data.val.split = cfg.data.val.split.format(fold)
+        cfg.data.test.split = cfg.data.test.split.format(fold)
+        cfg.evaluation.pre_eval = False
 
 
         # init distributed env first, since logger depends on the dist info.

@@ -452,17 +452,19 @@ class SwinBlock(BaseModule):
         x = self.norm1(x)
         self.attn.shw_shape = self.shw_shape
         self.attn_spec.shw_shape = self.shw_shape
-        if self.with_cp:
-            x = checkpoint(self.attn, x) + checkpoint(self.attn_spec, x) + identity
-        else:
-            x = self.attn(x) + self.attn_spec(x) + identity
+        # if self.with_cp:
+        #     x = checkpoint(self.attn, x) + checkpoint(self.attn_spec, x) + identity
+        # else:
+        #     x = self.attn(x) + self.attn_spec(x) + identity
+        x = self.attn(x) + self.attn_spec(x) + identity
 
         identity = x
         x = self.norm2(x)
-        if self.with_cp:
-            x = checkpoint(self.ffn, x, identity)
-        else:
-            x = self.ffn(x, identity)
+        # if self.with_cp:
+        #     x = checkpoint(self.ffn, x, identity)
+        # else:
+        #     x = self.ffn(x, identity)
+        x = self.ffn(x, identity)
 
         return x
 
