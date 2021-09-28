@@ -14,7 +14,7 @@
 
 文档: https://mmsegmentation.readthedocs.io/zh_CN/latest
 
-[English](README.md) | 简体中文
+[English](README_mmsegmentation.md) | 简体中文
 
 ## 简介
 

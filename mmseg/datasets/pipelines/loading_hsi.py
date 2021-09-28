@@ -81,26 +81,37 @@ class LoadENVIHyperSpectralImageFromFile(object):
                     key = key.strip()
                     value = value.strip()
                     hdr[key] = value
-        assert hdr['file type'] == 'ENVI Standard', 'Require ENVI data: file type = ENVI Standard, for more information please email:1395133179@qq.com'
-        assert hdr['byte order'] == '0', 'Require ENVI data: byte order = 0, for more information please email:1395133179@qq.com'
-        assert hdr['x start'] == '0', 'Require ENVI data: x start = 0, for more information please email:1395133179@qq.com'
-        assert hdr['y start'] == '0', 'Require ENVI data: y start = 0, for more information please email:1395133179@qq.com'
-        assert hdr['interleave'].lower() == 'bsq', 'Require ENVI data: interleave = bsq, for more information please email:1395133179@qq.com'
-        assert int(hdr['data type']) <= len(self.ENVI_data_type) and self.ENVI_data_type[int(hdr['data type'])] != None
+        # assert hdr['file type'] == 'ENVI Standard', \
+        #     'Require ENVI data: file type = ENVI Standard, for more information please email:1395133179@qq.com'
+        # assert hdr['byte order'] == '0', \
+        #     'Require ENVI data: byte order = 0, for more information please email:1395133179@qq.com'
+        # assert hdr['x start'] == '0', \
+        #     'Require ENVI data: x start = 0, for more information please email:1395133179@qq.com'
+        # assert hdr['y start'] == '0', \
+        #     'Require ENVI data: y start = 0, for more information please email:1395133179@qq.com'
+        assert int(hdr['data type']) <= len(self.ENVI_data_type) and self.ENVI_data_type[int(hdr['data type'])] != None, \
+            'Unrecognized data type, for more information please email:1395133179@qq.com'
 
         data_type = int(hdr['data type'])
         header_offset = int(hdr['header offset'])
         height = int(hdr['lines'])
         width = int(hdr['samples'])
         bands = int(hdr['bands'])
+        img_bytes = np.fromfile(filename.replace('.hdr', '.raw'), dtype=self.ENVI_data_type[data_type],offset=header_offset)
         if hdr['interleave'].lower() == 'bsq':
-            img_bytes = np.fromfile(filename.replace('.hdr', '.raw'), dtype=self.ENVI_data_type[data_type],offset=header_offset)
             img_bytes = img_bytes.reshape((bands, height, width))
             img_bytes = img_bytes[self.channel_select, :, :]
             img_bytes = np.transpose(img_bytes, (1, 2, 0))
+        elif hdr['interleave'].lower() == 'bip':
+            img_bytes = img_bytes.reshape((height, width, bands))
+            img_bytes = img_bytes[:, :, self.channel_select]
+        elif hdr['interleave'].lower() == 'bil':
+            img_bytes = img_bytes.reshape((height, bands, width))
+            img_bytes = img_bytes[:, self.channel_select, :]
+            img_bytes = np.transpose(img_bytes, (0, 2, 1))
         else:
-            img_bytes = np.zeros((height, width, bands), dtype=self.ENVI_data_type[data_type])
-            pass
+            raise ValueError('Unrecognized interleave, for more information please email:1395133179@qq.com')
+
         if self.to_float32:
             img_bytes = img_bytes.astype(np.float32)
             if self.normalization:
