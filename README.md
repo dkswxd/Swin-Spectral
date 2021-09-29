@@ -17,6 +17,9 @@ Spectral Aggregation token is used to summarize spectral information.
 ![architecture.png](resources/architecture.png)
 ![detail.png](resources/detail.png)
 
+The Swin-Spectral Transformer is implemented in 
+*mmseg/models/backbones/swinspectral.py*.
+
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
