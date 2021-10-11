@@ -640,6 +640,8 @@ class PatchEmbed(BaseModule):
             trunc_normal_init(self.spectral_aggregation_token, std=.02)
 
     def forward(self, x):
+        if self.norm is not None:
+            x = self.norm(x)
         x = torch.unsqueeze(x, 1) # from (B, S, H, W) to (B, 1, S, H, W)
 
         S, H, W = x.shape[2], x.shape[3], x.shape[4]
@@ -653,8 +655,6 @@ class PatchEmbed(BaseModule):
                 x = F.pad(
                     x, (0, self.patch_size[1] - W % self.patch_size[1], 0, 0))
 
-        if self.norm is not None:
-            x = self.norm(x)
 
         x = self.projection(x)
 
@@ -779,7 +779,7 @@ class SwinSpectralTransformer(BaseModule):
             kernel_size=patch_size,
             stride=patch_size,
             pad_to_patch_size=True,
-            norm_cfg=dict(type='IN3d') if patch_norm else None,
+            norm_cfg=dict(type='IN2d') if patch_norm else None,
             init_cfg=None,
             use_spectral_aggregation=use_spectral_aggregation)
 
