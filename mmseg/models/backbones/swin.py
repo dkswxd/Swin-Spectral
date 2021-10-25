@@ -5,6 +5,7 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.nn.init as init
 from mmcv.cnn import build_norm_layer, trunc_normal_init
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
 from mmcv.cnn.utils.weight_init import constant_init
@@ -686,15 +687,15 @@ class SwinTransformer(BaseModule):
         if self.pretrained is None:
             super().init_weights()
             if self.use_abs_pos_embed:
-                trunc_normal_init(self.absolute_pos_embed, std=0.02)
+                init.trunc_normal_(self.absolute_pos_embed, std=0.02)
             for m in self.modules():
                 if isinstance(m, Linear):
-                    trunc_normal_init(m.weight, std=.02)
+                    init.trunc_normal_(m.weight, std=.02)
                     if m.bias is not None:
-                        constant_init(m.bias, 0)
+                        init.constant_(m.bias, 0)
                 elif isinstance(m, LayerNorm):
-                    constant_init(m.bias, 0)
-                    constant_init(m.weight, 1.0)
+                    init.constant_(m.bias, 0)
+                    init.constant_(m.weight, 1.0)
         elif isinstance(self.pretrained, str):
             logger = get_root_logger()
             ckpt = _load_checkpoint(

@@ -5,7 +5,8 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import build_norm_layer, trunc_normal_init
+import torch.nn.init as init
+from mmcv.cnn import trunc_normal_init
 from mmcv.cnn import build_conv_layer, build_norm_layer
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
 from mmcv.cnn.utils.weight_init import constant_init
@@ -637,7 +638,7 @@ class PatchEmbed(BaseModule):
         self.use_spectral_aggregation = use_spectral_aggregation
         if self.use_spectral_aggregation == 'Token':
             self.spectral_aggregation_token = nn.Parameter(data=torch.empty(embed_dims),requires_grad=True)
-            trunc_normal_init(self.spectral_aggregation_token, std=.02)
+            init.trunc_normal_(self.spectral_aggregation_token, std=.02)
 
     def forward(self, x):
         if self.norm is not None:
