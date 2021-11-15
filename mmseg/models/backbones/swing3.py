@@ -259,7 +259,7 @@ class SwinTransformerGroup3(BaseModule):
         true_batchsize, true_channel, true_h, true_w = x.shape
         assert true_channel % 3 == 0
 
-        x = x.view(true_batchsize * true_channel / 3, 3, true_h, true_w)
+        x = x.view(true_batchsize * true_channel // 3, 3, true_h, true_w)
 
         x = self.patch_embed(x)
 
@@ -278,13 +278,13 @@ class SwinTransformerGroup3(BaseModule):
                                self.num_features[i]).permute(0, 3, 1,
                                                              2).contiguous()
                 if self.use_spectral_aggregation == 'Max':
-                    out = out.view(true_batchsize, true_channel / 3, self.num_features[i], *out_hw_shape)
+                    out = out.view(true_batchsize, true_channel // 3, self.num_features[i], *out_hw_shape)
                     out = out.max(dim=1)[0]
                 elif self.use_spectral_aggregation == 'Average':
-                    out = out.view(true_batchsize, true_channel / 3, self.num_features[i], *out_hw_shape)
+                    out = out.view(true_batchsize, true_channel // 3, self.num_features[i], *out_hw_shape)
                     out = out.mean(dim=1)
                 elif self.use_spectral_aggregation == 'KeepAll':
-                    out = out.view(true_batchsize, true_channel / 3 * self.num_features[i], *out_hw_shape)
+                    out = out.view(true_batchsize, true_channel // 3 * self.num_features[i], *out_hw_shape)
                 outs.append(out)
 
         return outs
