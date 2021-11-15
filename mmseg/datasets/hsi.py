@@ -149,13 +149,15 @@ class HSIDataset(CustomDataset):
                 for idx, name in enumerate(class_names)
             })
 
-        print_log('accuracy:{}'.format(accuracy(con_mat)), logger=logger)
-        print_log('kappa:{}'.format(kappa(con_mat)), logger=logger)
-        print_log('mIoU:{}'.format(eval_results['mIoU']), logger=logger)
-        print_log('mDice:{}'.format(eval_results['mDice']), logger=logger)
-        # print_log('precision:{}'.format(precision(con_mat)), logger=logger)
-        # print_log('sensitivity:{}'.format(sensitivity(con_mat)), logger=logger)
-        # print_log('specificity:{}'.format(specificity(con_mat)), logger=logger)
+        print_log('mIoU:{:.4f}'.format(eval_results['mIoU']), logger=logger)
+        print_log('mDice:{:.4f}'.format(eval_results['mDice']), logger=logger)
+        print_log('mAcc:{:.4f}'.format(eval_results['mAcc']), logger=logger)
+        print_log('aAcc:{:.4f}'.format(eval_results['aAcc']), logger=logger)
+        print_log('kappa:{:.4f}'.format(kappa(con_mat)), logger=logger)
+        print_log('accuracy:{:.4f}'.format(accuracy(con_mat)), logger=logger)
+        # print_log('precision:{:.4f}'.format(precision(con_mat)), logger=logger)
+        # print_log('sensitivity:{:.4f}'.format(sensitivity(con_mat)), logger=logger)
+        # print_log('specificity:{:.4f}'.format(specificity(con_mat)), logger=logger)
 
         return eval_results
 
