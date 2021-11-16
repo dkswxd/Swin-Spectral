@@ -93,6 +93,7 @@ class SwinTransformerGroup3(BaseModule):
                  norm_cfg=dict(type='LN'),
                  pretrained=None,
                  init_cfg=None,
+                 with_cp=False,
                  use_spectral_aggregation='KeepAll'):
         super(SwinTransformerGroup3, self).__init__()
 
@@ -173,7 +174,8 @@ class SwinTransformerGroup3(BaseModule):
                 downsample=downsample,
                 act_cfg=act_cfg,
                 norm_cfg=norm_cfg,
-                init_cfg=None)
+                init_cfg=None,
+                with_cp=with_cp)
             self.stages.append(stage)
 
             dpr = dpr[depths[i]:]

@@ -14,6 +14,7 @@ from mmcv.runner.base_module import BaseModule, ModuleList
 from torch.nn.modules.linear import Linear
 from torch.nn.modules.normalization import LayerNorm
 from torch.nn.modules.utils import _pair as to_2tuple
+from torch.utils.checkpoint import checkpoint
 
 from mmseg.ops import resize
 from ...utils import get_root_logger
@@ -427,8 +428,10 @@ class SwinBlock(BaseModule):
             act_cfg=act_cfg,
             add_identity=True,
             init_cfg=None)
+        self.hw_shape = None
 
-    def forward(self, x, hw_shape):
+    def forward(self, x):
+        hw_shape = self.hw_shape
         identity = x
         x = self.norm1(x)
         x = self.attn(x, hw_shape)
@@ -481,7 +484,8 @@ class SwinBlockSequence(BaseModule):
                  downsample=None,
                  act_cfg=dict(type='GELU'),
                  norm_cfg=dict(type='LN'),
-                 init_cfg=None):
+                 init_cfg=None,
+                 with_cp=False):
         super().__init__()
 
         self.init_cfg = init_cfg
@@ -507,12 +511,16 @@ class SwinBlockSequence(BaseModule):
                 norm_cfg=norm_cfg,
                 init_cfg=None)
             self.blocks.append(block)
-
+        self.with_cp=with_cp
         self.downsample = downsample
 
     def forward(self, x, hw_shape):
         for block in self.blocks:
-            x = block(x, hw_shape)
+            block.hw_shape = hw_shape
+            if self.with_cp:
+                x = checkpoint(block, x)
+            else:
+                x = block(x)
 
         if self.downsample:
             x_down, down_hw_shape = self.downsample(x, hw_shape)
@@ -590,7 +598,8 @@ class SwinTransformer(BaseModule):
                  act_cfg=dict(type='GELU'),
                  norm_cfg=dict(type='LN'),
                  pretrained=None,
-                 init_cfg=None):
+                 init_cfg=None,
+                 with_cp=False):
         super(SwinTransformer, self).__init__()
 
         if isinstance(pretrain_img_size, int):
@@ -669,7 +678,8 @@ class SwinTransformer(BaseModule):
                 downsample=downsample,
                 act_cfg=act_cfg,
                 norm_cfg=norm_cfg,
-                init_cfg=None)
+                init_cfg=None,
+                with_cp=with_cp)
             self.stages.append(stage)
 
             dpr = dpr[depths[i]:]
