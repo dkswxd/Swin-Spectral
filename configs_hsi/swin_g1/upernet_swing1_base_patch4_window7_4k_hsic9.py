@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/upernet_swing3.py', '../_base_/datasets/hsic30.py',
+    '../_base_/models/upernet_swing1.py', '../_base_/datasets/hsic9.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 
@@ -15,14 +15,13 @@ model = dict(
         use_abs_pos_embed=False,
         drop_path_rate=0.3,
         patch_norm=True,
-        in_channels=3,
-        with_cp=True),
+        in_channels=3),
     decode_head=dict(
-        in_channels=[96 * 10, 192 * 10, 384 * 10, 768 * 10],
+        in_channels=[96 * 9, 192 * 9, 384 * 9, 768 * 9],
         num_classes=2,
         norm_cfg=norm_cfg),
     auxiliary_head=dict(
-        in_channels=384 * 10,
+        in_channels=384 * 9,
         num_classes=2,
         norm_cfg=norm_cfg))
 

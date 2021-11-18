@@ -10,6 +10,7 @@ from .resnet import ResNet, ResNetV1c, ResNetV1d
 from .resnext import ResNeXt
 from .swin import SwinTransformer
 from .swing3 import SwinTransformerGroup3
+from .swing1 import SwinTransformerGroup1
 from .swinspectral import SwinSpectralTransformer
 from .unet import UNet
 from .vit import VisionTransformer
@@ -18,5 +19,5 @@ __all__ = [
     'ResNet', 'ResNetV1c', 'ResNetV1d', 'ResNeXt', 'HRNet', 'FastSCNN',
     'ResNeSt', 'MobileNetV2', 'UNet', 'CGNet', 'MobileNetV3',
     'VisionTransformer', 'SwinTransformer', 'MixVisionTransformer',
-    'SwinSpectralTransformer', 'SwinTransformerGroup3'
+    'SwinSpectralTransformer', 'SwinTransformerGroup3', 'SwinTransformerGroup1'
 ]
