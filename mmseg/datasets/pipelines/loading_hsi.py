@@ -395,11 +395,81 @@ class LoadENVIHyperSpectralImageFromFileWithExtra(object):
 
 
 '''
-cv2.imwrite('ann.png', (ann*255).astype(np.uint8))
-for i in range(60):
-    cv2.imwrite(f'{i}.png', (img_bytes[:,:,i]*8+128).astype(np.uint8))
-for i in range(60):
-    cv2.imwrite(f'{i}+.png', (img_bytes_positive[:,:,i]*8+128).astype(np.uint8))
-for i in range(60):
-    cv2.imwrite(f'{i}-.png', (img_bytes_negative[:,:,i]*8+128).astype(np.uint8))
+from PIL import Image
+prefix='sample1_'
+cv2.imwrite(prefix+'ann.png', (ann[::4,::4]*255).astype(np.uint8))
+_scale=16
+_bias=128
+image_mixed=Image.fromarray((img_bytes[::4,::4,0]*_scale+_bias).astype(np.uint8))
+image_positive=Image.fromarray((img_bytes_positive[::4,::4,0]*_scale+_bias).astype(np.uint8))
+image_negative=Image.fromarray((img_bytes_negative[::4,::4,0]*_scale+_bias).astype(np.uint8))
+images_positive=[]
+images_negative=[]
+images_mixed=[]
+for i in range(1, 60):
+    images_mixed.append(Image.fromarray((img_bytes[::4,::4,i]*_scale+_bias).astype(np.uint8)))
+    images_positive.append(Image.fromarray((img_bytes_positive[::4,::4,i]*_scale+_bias).astype(np.uint8)))
+    images_negative.append(Image.fromarray((img_bytes_negative[::4,::4,i]*_scale+_bias).astype(np.uint8)))
+image_mixed.save(prefix+'images_mixed.gif', 
+        save_all=True, append_images=images_mixed,loop=10086,duration=1000)
+image_positive.save(prefix+'images_positive.gif', 
+        save_all=True, append_images=images_positive,loop=10086,duration=1000)
+image_negative.save(prefix+'images_negative.gif', 
+        save_all=True, append_images=images_negative,loop=10086,duration=1000)
 '''
+
+'''
+prefix='sample1_'
+_scale=16
+_bias=128
+_down=8
+_show=(10, 20, 30)
+_line=4
+_h, _w, _c = img_bytes.shape
+_h //= _down
+_w //= _down
+_place_holder = np.ones(((_h+_line)*len(_show), (_w+_line)*4), dtype=np.uint8)*255
+for _row in range(len(_show)):
+    _row_start = _row*(_h+_line)
+    _col_start = 0*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (ann[::_down,::_down, 0]*255).astype(np.uint8)
+    _col_start = 1*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+    _col_start = 2*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes_positive[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+    _col_start = 3*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes_negative[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+cv2.imwrite(prefix+'images_matrix.png', _place_holder)
+'''
+
+'''
+prefix='sample_without_prenorm1_'
+_scale=16
+_bias=128
+_down=8
+_show=(10, 20, 30)
+_line=4
+_h, _w, _c = img_bytes.shape
+_h //= _down
+_w //= _down
+img_bytes_positive -= np.mean(img_bytes_positive,axis=(0,1),keepdims=True)
+img_bytes_positive /= np.clip(np.std(img_bytes_positive,axis=(0,1),keepdims=True), 1e-6, 1e6)
+img_bytes_negative -= np.mean(img_bytes_negative,axis=(0,1),keepdims=True)
+img_bytes_negative /= np.clip(np.std(img_bytes_negative,axis=(0,1),keepdims=True), 1e-6, 1e6)
+img_bytes -= np.mean(img_bytes,axis=(0,1),keepdims=True)
+img_bytes /= np.clip(np.std(img_bytes,axis=(0,1),keepdims=True), 1e-6, 1e6)
+_place_holder = np.ones(((_h+_line)*len(_show), (_w+_line)*4), dtype=np.uint8)*255
+for _row in range(len(_show)):
+    _row_start = _row*(_h+_line)
+    _col_start = 0*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (ann[::_down,::_down, 0]*255).astype(np.uint8)
+    _col_start = 1*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+    _col_start = 2*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes_positive[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+    _col_start = 3*(_w+_line)
+    _place_holder[_row_start : _row_start+_h, _col_start : _col_start+_w] = (img_bytes_negative[::_down,::_down,_show[_row]]*_scale+_bias).astype(np.uint8)
+cv2.imwrite(prefix+'images_matrix.png', _place_holder)
+
+'''
+

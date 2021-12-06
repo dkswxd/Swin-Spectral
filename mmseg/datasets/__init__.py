@@ -15,6 +15,7 @@ from .stare import STAREDataset
 from .voc import PascalVOCDataset
 from .hsi import HSIDataset
 from .hsiex import HSIExtraDataset
+from .hsiexv2 import HSIExtraDatasetV2
 
 __all__ = [
     'CustomDataset', 'build_dataloader', 'ConcatDataset', 'RepeatDataset',
@@ -22,5 +23,5 @@ __all__ = [
     'PascalVOCDataset', 'ADE20KDataset', 'PascalContextDataset',
     'PascalContextDataset59', 'ChaseDB1Dataset', 'DRIVEDataset', 'HRFDataset',
     'STAREDataset', 'DarkZurichDataset', 'NightDrivingDataset',
-    'COCOStuffDataset', 'HSIDataset', 'HSIExtraDataset'
+    'COCOStuffDataset', 'HSIDataset', 'HSIExtraDataset', 'HSIExtraDatasetV2'
 ]

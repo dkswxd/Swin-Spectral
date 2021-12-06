@@ -17,7 +17,7 @@ from mmseg.core import eval_metrics
 from sklearn import metrics
 
 @DATASETS.register_module()
-class HSIExtraDataset(CustomDataset):
+class HSIExtraDatasetV2(CustomDataset):
     """Pascal VOC dataset.
 
     Args:
@@ -28,28 +28,21 @@ class HSIExtraDataset(CustomDataset):
 
     PALETTE = [[0, 0, 0], [255, 255, 255]]
 
-    def __init__(self, split, full_positive_dir, full_negative_dir, extra_rate=1.0, **kwargs):
-        super(HSIExtraDataset, self).__init__(
+    def __init__(self, split, full_negative_dir, extra_rate=1.0, **kwargs):
+        super(HSIExtraDatasetV2, self).__init__(
             img_suffix='.hdr', seg_map_suffix='.png', split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
-        self.full_positive_dir = full_positive_dir
         self.full_negative_dir = full_negative_dir
         if self.data_root is not None:
-            if not osp.isabs(self.full_positive_dir):
-                self.full_positive_dir = osp.join(self.data_root, self.full_positive_dir)
             if not osp.isabs(self.full_negative_dir):
                 self.full_negative_dir = osp.join(self.data_root, self.full_negative_dir)
-        self.full_positive_infos, self.full_negative_infos = \
-            self.load_extra_annotations(self.full_positive_dir, self.full_negative_dir, self.img_suffix)
+        self.full_negative_infos = self.load_extra_annotations(self.full_negative_dir, self.img_suffix)
         self.extra_rate = extra_rate
         self.len_true = len(self.img_infos)
         self.len_false = int(self.len_true * self.extra_rate)
-        self.len_positive = len(self.full_positive_infos)
         self.len_negative = len(self.full_negative_infos)
-        self.extra_positive_idx = self.len_positive
         self.extra_negative_idx = self.len_negative
         self.extra_ann_idx = self.len_true
-        self.shuffled_positive_map = np.arange(self.len_positive)
         self.shuffled_negative_map = np.arange(self.len_negative)
         self.shuffled_ann_map = np.arange(self.len_true)
         self.rng = default_rng()
@@ -57,21 +50,17 @@ class HSIExtraDataset(CustomDataset):
     def __len__(self):
         return self.len_false
 
-    def load_extra_annotations(self, full_positive_dir, full_negative_dir, img_suffix):
-        full_positive_infos = []
-        for img in mmcv.scandir(full_positive_dir, img_suffix, recursive=True):
-            full_positive_infos.append(dict(filename=img))
+    def load_extra_annotations(self, full_negative_dir, img_suffix):
         full_negative_infos = []
         for img in mmcv.scandir(full_negative_dir, img_suffix, recursive=True):
             full_negative_infos.append(dict(filename=img))
-        print_log(f'Loaded {len(full_positive_infos)} positive images', logger=get_root_logger())
         print_log(f'Loaded {len(full_negative_infos)} negative images', logger=get_root_logger())
-        return full_positive_infos, full_negative_infos
+        return full_negative_infos
 
     def pre_pipeline(self, results):
         """Prepare results dict for pipeline."""
         results['seg_fields'] = []
-        results['full_positive_prefix'] = self.full_positive_dir
+        results['full_positive_prefix'] = self.img_dir
         results['full_negative_prefix'] = self.full_negative_dir
         results['img_prefix'] = self.img_dir
         results['seg_prefix'] = self.ann_dir
@@ -83,20 +72,16 @@ class HSIExtraDataset(CustomDataset):
             img_info = self.img_infos[idx]
             ann_info = self.get_ann_info(idx)
         else:
-            if self.extra_positive_idx == self.len_positive:
-                self.rng.shuffle(self.shuffled_positive_map)
-                self.extra_positive_idx = 0
             if self.extra_negative_idx == self.len_negative:
                 self.rng.shuffle(self.shuffled_negative_map)
                 self.extra_negative_idx = 0
             if self.extra_ann_idx == self.len_true:
                 self.rng.shuffle(self.shuffled_ann_map)
                 self.extra_ann_idx = 0
-            img_info = dict(positive=self.full_positive_infos[self.shuffled_positive_map[self.extra_positive_idx]],
+            img_info = dict(positive=self.img_infos[self.shuffled_ann_map[self.extra_ann_idx]],
                             negative=self.full_negative_infos[self.shuffled_negative_map[self.extra_negative_idx]],
                             ann=self.get_ann_info(self.shuffled_ann_map[self.extra_ann_idx]))
             ann_info = self.get_ann_info(self.shuffled_ann_map[self.extra_ann_idx])
-            self.extra_positive_idx += 1
             self.extra_negative_idx += 1
             self.extra_ann_idx += 1
         results = dict(img_info=img_info, ann_info=ann_info)
