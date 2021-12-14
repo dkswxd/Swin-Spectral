@@ -8,6 +8,11 @@ import torch
 from mmcv.runner import CheckpointLoader
 
 
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
+
+
 def convert_swin(ckpt):
     new_ckpt = OrderedDict()
 

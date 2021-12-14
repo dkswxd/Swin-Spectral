@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
 
-import mmcv
+import torch
 import numpy as np
 import cv2
 
@@ -125,8 +125,8 @@ class LoadENVIHyperSpectralImageFromFile(object):
                 # img_bytes -= np.min(img_bytes)
                 # img_bytes /= np.max(img_bytes)
         if self.median_blur:
-            for band in range(img_bytes.shape[0]):
-                img_bytes[band, :, :] = cv2.medianBlur(img_bytes[band, :, :], ksize=3)
+            for band in range(img_bytes.shape[2]):
+                img_bytes[:, :, band] = cv2.medianBlur(img_bytes[:, :, band], ksize=3)
 
         results['filename'] = filename.replace('.hdr', '.png')
         results['ori_filename'] = results['img_info']['filename'].replace('.hdr', '.png')
@@ -190,9 +190,10 @@ class LoadENVIHyperSpectralImageFromFileAndPCA(object):
         self.channel_to_show = channel_to_show
         self.median_blur = median_blur
 
-        self.mean_vector = np.load('./data/HSI/mean_vector.npy')
-        self.std_vector = np.load('./data/HSI/std_vector.npy')
-        self.pca_vector = np.load('./data/HSI/pca_vector.npy')[:, :channel_keep]
+        self.mean_vector = torch.tensor(np.load('./data/HSI/mean_vector.npy'), dtype=torch.float32)
+        self.std_vector = torch.tensor(np.load('./data/HSI/std_vector.npy'), dtype=torch.float32)
+        self.pca_vector = torch.tensor(np.load('./data/HSI/pca_vector.npy')[:, :channel_keep],
+                                       dtype=torch.float32).permute(1, 0)
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -212,12 +213,12 @@ class LoadENVIHyperSpectralImageFromFileAndPCA(object):
 
         img_bytes = load_ENVI_hyperspectral_image_from_file(filename)
         height, width, bands = img_bytes.shape
-
-        img_bytes = img_bytes.reshape((-1, bands)).astype(np.float32)
-        img_bytes -= self.mean_vector
-        img_bytes /= self.std_vector
-        img_bytes = np.dot(img_bytes, self.pca_vector)
-        img_bytes = img_bytes.reshape((height, width, -1))
+        with torch.no_grad():
+            img_bytes = torch.tensor(img_bytes, dtype=torch.float32)
+            img_bytes -= self.mean_vector.view(1, 1, bands)
+            img_bytes /= self.std_vector.view(1, 1, bands)
+            img_bytes = torch.nn.functional.linear(img_bytes, self.pca_vector)
+            img_bytes = img_bytes.numpy()
 
         if self.to_float32:
             img_bytes = img_bytes.astype(np.float32)
@@ -227,8 +228,8 @@ class LoadENVIHyperSpectralImageFromFileAndPCA(object):
                 # img_bytes -= np.min(img_bytes)
                 # img_bytes /= np.max(img_bytes)
         if self.median_blur:
-            for band in range(img_bytes.shape[0]):
-                img_bytes[band, :, :] = cv2.medianBlur(img_bytes[band, :, :], ksize=3)
+            for band in range(img_bytes.shape[2]):
+                img_bytes[:, :, band] = cv2.medianBlur(img_bytes[:, :, band], ksize=3)
 
         results['filename'] = filename.replace('.hdr', '.png')
         results['ori_filename'] = results['img_info']['filename'].replace('.hdr', '.png')
@@ -356,8 +357,8 @@ class LoadENVIHyperSpectralImageFromFileWithExtra(object):
                 # img_bytes -= np.min(img_bytes)
                 # img_bytes /= np.max(img_bytes)
         if self.median_blur:
-            for band in range(img_bytes.shape[0]):
-                img_bytes[band, :, :] = cv2.medianBlur(img_bytes[band, :, :], ksize=3)
+            for band in range(img_bytes.shape[2]):
+                img_bytes[:, :, band] = cv2.medianBlur(img_bytes[:, :, band], ksize=3)
 
         if 'filename' in results['img_info'].keys():
             results['filename'] = filename.replace('.hdr', '.png')
