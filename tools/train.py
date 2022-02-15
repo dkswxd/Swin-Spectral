@@ -95,6 +95,8 @@ def main():
     if args.fold != -1:
         cfg.work_dir = cfg.work_dir.format(args.fold)
         cfg.data.train.split = cfg.data.train.split.format(args.fold)
+        if cfg.data.train.gan_split is not None:
+            cfg.data.train.gan_split = cfg.data.train.gan_split.format(args.fold)
         cfg.data.val.split = cfg.data.val.split.format(args.fold)
         cfg.data.test.split = cfg.data.test.split.format(args.fold)
 
@@ -193,7 +195,7 @@ def eval_best(work_dir,log_filename, metric):
     latest_iteration = 0
     with open(log_filename) as f:
         for line in f.readlines():
-            if not line.startswith('2021'):
+            if not line.startswith('202'):
                 continue
             parse_line = line.strip().split(' ')
             if len(parse_line) < 8:

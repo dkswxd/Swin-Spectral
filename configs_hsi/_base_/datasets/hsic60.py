@@ -2,12 +2,12 @@
 dataset_type = 'HSIDataset'
 data_root = 'data/HSI'
 img_norm_cfg = dict(
-    mean=[128]*32, std=[16]*32, to_rgb=False)
+    mean=[128]*3, std=[16]*3, to_rgb=False)
 crop_size = (512, 512)
 train_pipeline = [
-    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36),median_blur=False),
+    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(60)),
     dict(type='LoadAnnotations'),
-    dict(type='Resize', img_scale=(2048, 512), ratio_range=(0.5, 2.0)),
+    dict(type='Resize', img_scale=(512, 640), ratio_range=(0.5, 2.0)),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     # dict(type='PhotoMetricDistortion'),
@@ -17,10 +17,10 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_semantic_seg']),
 ]
 test_pipeline = [
-    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36)),
+    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(60)),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(640, 640),
+        img_scale=(512, 640),
         # img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
         flip=False,
         transforms=[
@@ -33,7 +33,7 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=8,
+    workers_per_gpu=16,
     train=dict(
         type=dataset_type,
         data_root=data_root,

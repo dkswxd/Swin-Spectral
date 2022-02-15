@@ -1,5 +1,5 @@
 # dataset settings
-dataset_type = 'HSIDataset'
+dataset_type = 'HSIGANDataset'
 data_root = 'data/HSI'
 img_norm_cfg = dict(
     mean=[128]*32, std=[16]*32, to_rgb=False)
@@ -39,6 +39,9 @@ data = dict(
         data_root=data_root,
         img_dir='hdr_dir',
         ann_dir='ann_dir',
+        gan_img_dir='gan_512_85000_dir',
+        gan_ann_dir='ann_dir',
+        gan_split='split_dir/split_{}_train.txt',
         split='split_dir/split_{}_train.txt',
         pipeline=train_pipeline),
     val=dict(

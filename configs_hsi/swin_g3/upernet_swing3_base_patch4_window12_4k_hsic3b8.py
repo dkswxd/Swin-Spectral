@@ -1,16 +1,16 @@
 _base_ = [
-    '../_base_/models/upernet_swin.py', '../_base_/datasets/hsic3.py',
+    '../_base_/models/upernet_swing3.py', '../_base_/datasets/hsic3.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 
 norm_cfg = dict(type='BN', requires_grad=True) # for single GPU training
 
 model = dict(
-    pretrained='pretrain/swin_large_patch4_window12_384_22k.pth',
+    pretrained='pretrain/swin_base_patch4_window12_384_22k.pth',
     backbone=dict(
-        embed_dims=192,
+        embed_dims=128,
         depths=[2, 2, 18, 2],
-        num_heads=[6, 12, 24, 48],
+        num_heads=[4, 8, 16, 32],
         window_size=12,
         use_abs_pos_embed=False,
         drop_path_rate=0.3,
@@ -18,13 +18,14 @@ model = dict(
         in_channels=3,
         with_cp=True),
     decode_head=dict(
-        in_channels=[192, 384, 768, 1536],
+        in_channels=[128, 256, 512, 1024],
         num_classes=2,
         norm_cfg=norm_cfg),
     auxiliary_head=dict(
-        in_channels=768,
+        in_channels=512,
         num_classes=2,
         norm_cfg=norm_cfg))
+
 
 # AdamW optimizer, no weight decay for position embedding & layer norm
 # in backbone
@@ -52,4 +53,4 @@ lr_config = dict(
     by_epoch=False)
 
 # By default, models are trained on 8 GPUs with 2 images per GPU
-data = dict(samples_per_gpu=2)
+data = dict(samples_per_gpu=8)

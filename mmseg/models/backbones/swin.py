@@ -149,7 +149,7 @@ class WindowMSA(BaseModule):
         self.softmax = nn.Softmax(dim=-1)
 
     def init_weights(self):
-        trunc_normal_init(self.relative_position_bias_table, std=0.02)
+        init.trunc_normal_(self.relative_position_bias_table, std=0.02)
 
     def forward(self, x, mask=None):
         """

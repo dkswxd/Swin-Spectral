@@ -6,7 +6,7 @@ _base_ = [
 norm_cfg = dict(type='BN', requires_grad=True) # for single GPU training
 
 model = dict(
-    pretrained='pretrain/swin_small_patch4_window7_224.pth',
+    pretrained=None,
     backbone=dict(
         embed_dims=96,
         depths=[2, 2, 18, 2],

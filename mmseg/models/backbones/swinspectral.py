@@ -141,7 +141,7 @@ class WindowMSA3D(BaseModule):
         self.softmax = nn.Softmax(dim=-1)
 
     def init_weights(self):
-        trunc_normal_init(self.relative_position_bias_table, std=0.02)
+        init.trunc_normal_(self.relative_position_bias_table, std=0.02)
 
     def forward(self, x, mask=None):
         """
@@ -641,8 +641,6 @@ class PatchEmbed(BaseModule):
             init.trunc_normal_(self.spectral_aggregation_token, std=.02)
 
     def forward(self, x):
-        if self.norm is not None:
-            x = self.norm(x)
         x = torch.unsqueeze(x, 1) # from (B, S, H, W) to (B, 1, S, H, W)
 
         S, H, W = x.shape[2], x.shape[3], x.shape[4]
@@ -669,6 +667,8 @@ class PatchEmbed(BaseModule):
 
         x = x.flatten(2).transpose(1, 2) # from (B, C, S, H, W) to (B, C, S*H*W) to (B, S*H*W, C)
 
+        if self.norm is not None:
+            x = self.norm(x)
 
         return x
 
@@ -780,7 +780,7 @@ class SwinSpectralTransformer(BaseModule):
             kernel_size=patch_size,
             stride=patch_size,
             pad_to_patch_size=True,
-            norm_cfg=dict(type='IN2d') if patch_norm else None,
+            norm_cfg=dict(type='LN') if patch_norm else None,
             init_cfg=None,
             use_spectral_aggregation=use_spectral_aggregation)
 
@@ -849,13 +849,14 @@ class SwinSpectralTransformer(BaseModule):
             # if self.use_abs_pos_embed:
             #     trunc_normal_init(self.absolute_pos_embed, std=0.02)
             for m in self.modules():
-                if isinstance(m, Linear):
-                    trunc_normal_init(m.weight, std=.02)
+                if isinstance(m, Linear) or isinstance(m, nn.Conv3d) or \
+                   isinstance(m, nn.Conv2d) or isinstance(m, nn.Conv1d):
+                    init.trunc_normal_(m.weight, std=.02)
                     if m.bias is not None:
-                        constant_init(m.bias, 0)
+                        init.constant_(m.bias, 0)
                 elif isinstance(m, LayerNorm):
-                    constant_init(m.bias, 0)
-                    constant_init(m.weight, 1.0)
+                    init.constant_(m.bias, 0)
+                    init.constant_(m.weight, 1.0)
         # elif isinstance(self.pretrained, str):
         #     logger = get_root_logger()
         #     ckpt = _load_checkpoint(

@@ -1,30 +1,32 @@
 _base_ = [
-    '../_base_/models/upernet_swin.py', '../_base_/datasets/hsic3.py',
+    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsi.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
-
-norm_cfg = dict(type='BN', requires_grad=True) # for single GPU training
-
+norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
-    pretrained='pretrain/swin_large_patch4_window12_384_22k.pth',
     backbone=dict(
-        embed_dims=192,
+        embed_dims=96,
         depths=[2, 2, 18, 2],
-        num_heads=[6, 12, 24, 48],
-        window_size=12,
-        use_abs_pos_embed=False,
+        num_heads=[3, 6, 12, 24],
+        window_size=(1, 7, 7),
+        window_size_spectral=(9, 1, 1),
+        patch_size=(4, 4, 4),
         drop_path_rate=0.3,
         patch_norm=True,
-        in_channels=3,
-        with_cp=True),
+        with_cp=True,
+        in_channels=1,
+        use_spectral_aggregation='Max'
+    ),
     decode_head=dict(
-        in_channels=[192, 384, 768, 1536],
+        in_channels=[96, 192, 384, 768],
         num_classes=2,
-        norm_cfg=norm_cfg),
+        norm_cfg=norm_cfg
+    ),
     auxiliary_head=dict(
-        in_channels=768,
+        in_channels=384,
         num_classes=2,
-        norm_cfg=norm_cfg))
+        norm_cfg=norm_cfg
+    ))
 
 # AdamW optimizer, no weight decay for position embedding & layer norm
 # in backbone
