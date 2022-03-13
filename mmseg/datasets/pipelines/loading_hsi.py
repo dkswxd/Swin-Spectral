@@ -346,6 +346,7 @@ class LoadENVIHyperSpectralImageFromFileWithExtra(object):
             ann = cv2.blur(ann, ksize=self.label_smoothing).astype(np.float32) / 255
             ann = np.expand_dims(ann, -1)
             img_bytes = ann * img_bytes_positive + (1 - ann) * img_bytes_negative
+            __breakpoint = 0
 
 
         img_bytes = img_bytes[:, :, self.channel_select]

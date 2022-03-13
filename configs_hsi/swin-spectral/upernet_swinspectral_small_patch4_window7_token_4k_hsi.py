@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsi.py',
+    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsix.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 norm_cfg = dict(type='BN', requires_grad=True)
