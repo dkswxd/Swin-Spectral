@@ -1,6 +1,6 @@
 ## Prerequisites
 
-- Linux or macOS (Windows is in experimental support)
+77.53   86.83- Linux or macOS (Windows is in experimental support)
 - Python 3.6+
 - PyTorch 1.3+
 - CUDA 9.2+ (If you build PyTorch from source, CUDA 9.0 is also compatible)
