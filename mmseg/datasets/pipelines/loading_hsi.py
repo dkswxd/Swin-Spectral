@@ -132,10 +132,10 @@ class LoadENVIHyperSpectralImageFromFile(object):
         if self.to_float32:
             img_bytes = img_bytes.astype(np.float32)
             if self.normalization:
-                img_bytes -= np.mean(img_bytes,axis=(0,1),keepdims=True)
-                img_bytes /= np.clip(np.std(img_bytes,axis=(0,1),keepdims=True), 1e-6, 1e6)
-                # img_bytes -= np.min(img_bytes)
-                # img_bytes /= np.max(img_bytes)
+                # img_bytes -= np.mean(img_bytes,axis=(0,1),keepdims=True)
+                # img_bytes /= np.clip(np.std(img_bytes,axis=(0,1),keepdims=True), 1e-6, 1e6)
+                img_bytes -= np.min(img_bytes)
+                img_bytes /= np.max(img_bytes)
         if self.median_blur:
             for band in range(img_bytes.shape[2]):
                 img_bytes[:, :, band] = cv2.medianBlur(img_bytes[:, :, band], ksize=3)
