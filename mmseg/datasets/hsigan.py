@@ -27,7 +27,7 @@ class HSIGANDataset(CustomDataset):
 
     PALETTE = [[0, 0, 0], [255, 255, 255]]
 
-    def __init__(self, split, gan_img_dir=None, gan_ann_dir=None, gan_split=None, **kwargs):
+    def __init__(self, split, gan_img_dir=None, gan_ann_dir=None, gan_split=None, gan_suffix=None, **kwargs):
         super(HSIGANDataset, self).__init__(
             img_suffix='.hdr', seg_map_suffix='.png', split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
@@ -35,6 +35,7 @@ class HSIGANDataset(CustomDataset):
             self.gan_img_dir = gan_img_dir
             self.gan_ann_dir = gan_ann_dir
             self.gan_split = gan_split
+            self.gan_suffix = gan_suffix
             if self.data_root is not None:
                 if not osp.isabs(self.gan_img_dir):
                     self.gan_img_dir = osp.join(self.data_root, self.gan_img_dir)
@@ -42,7 +43,7 @@ class HSIGANDataset(CustomDataset):
                     self.gan_ann_dir = osp.join(self.data_root, self.gan_ann_dir)
                 if not (self.gan_split is None or osp.isabs(self.gan_split)):
                     self.gan_split = osp.join(self.data_root, self.gan_split)
-            self.gan_infos = self.load_annotations(self.gan_img_dir, self.img_suffix,
+            self.gan_infos = self.load_annotations(self.gan_img_dir, self.gan_suffix,
                                                    self.gan_ann_dir, self.seg_map_suffix,
                                                    self.gan_split)
             self.len_gan = len(self.gan_infos)

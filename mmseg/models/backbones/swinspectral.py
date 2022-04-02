@@ -638,7 +638,7 @@ class PatchEmbed(BaseModule):
         self.use_spectral_aggregation = use_spectral_aggregation
         if self.use_spectral_aggregation == 'Token':
             self.spectral_aggregation_token = nn.Parameter(data=torch.empty(embed_dims),requires_grad=True)
-            init.trunc_normal_(self.spectral_aggregation_token, std=.02)
+            init.trunc_normal_(self.spectral_aggregation_token, std=1)
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1) # from (B, S, H, W) to (B, 1, S, H, W)

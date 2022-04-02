@@ -29,7 +29,7 @@ class HSIPNGDataset(CustomDataset):
 
     def __init__(self, split, gan_img_dir=None, gan_ann_dir=None, gan_split=None, **kwargs):
         super(HSIPNGDataset, self).__init__(
-            img_suffix='.png', seg_map_suffix='.png', split=split, **kwargs)
+            img_suffix='.jpg', seg_map_suffix='.png', split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
         if gan_img_dir is not None:
             self.gan_img_dir = gan_img_dir

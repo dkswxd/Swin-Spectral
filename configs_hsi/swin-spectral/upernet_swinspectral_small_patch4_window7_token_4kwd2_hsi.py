@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsixgan.py',
+    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsix.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 norm_cfg = dict(type='BN', requires_grad=True)
@@ -13,7 +13,7 @@ model = dict(
         patch_size=(4, 4, 4),
         drop_path_rate=0.3,
         patch_norm=True,
-        with_cp=True,
+        with_cp=False,
         in_channels=1,
         use_spectral_aggregation='Token'
     ),
@@ -33,14 +33,15 @@ model = dict(
 optimizer = dict(
     _delete_=True,
     type='AdamW',
-    lr=0.00006,
+    lr=0.0006,
     betas=(0.9, 0.999),
-    weight_decay=0.01,
+    weight_decay=0.001,
     paramwise_cfg=dict(
         custom_keys={
             'absolute_pos_embed': dict(decay_mult=0.),
             'relative_position_bias_table': dict(decay_mult=0.),
-            'norm': dict(decay_mult=0.)
+            'norm': dict(decay_mult=0.),
+            'token': dict(decay_mult=0.)
         }))
 
 lr_config = dict(

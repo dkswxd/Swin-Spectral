@@ -20,6 +20,7 @@ def load_ENVI_hyperspectral_image_from_file(filename):
                       None,
                       None,
                       None,
+                      None,
                       np.uint16,    # 12
                       np.uint32,]   # 13
     hdr = dict()
@@ -90,12 +91,14 @@ class LoadENVIHyperSpectralImageFromFile(object):
                  to_float32=True,
                  normalization=True,
                  channel_to_show=(10, 20, 30),
-                 median_blur=True):
+                 median_blur=True,
+                 npy_transpose=False):
         self.to_float32 = to_float32
         self.normalization = normalization
         self.channel_select = channel_select
         self.channel_to_show = channel_to_show
         self.median_blur = median_blur
+        self.npy_transpose = npy_transpose
 
 
     def __call__(self, results):
@@ -114,7 +117,16 @@ class LoadENVIHyperSpectralImageFromFile(object):
         else:
             filename = results['img_info']['filename']
 
-        img_bytes = load_ENVI_hyperspectral_image_from_file(filename)
+        if filename.endswith('hdr'):
+            img_bytes = load_ENVI_hyperspectral_image_from_file(filename)
+        elif filename.endswith('npy'):
+            img_bytes = np.load(filename)
+            if img_bytes.shape[0] == 1:
+                img_bytes = img_bytes[0]
+            if self.npy_transpose:
+                img_bytes = np.transpose(img_bytes, (1, 2, 0))
+
+
 
         img_bytes = img_bytes[:, :, self.channel_select]
         if self.to_float32:
