@@ -13,6 +13,7 @@ NECKS = MODELS
 HEADS = MODELS
 LOSSES = MODELS
 SEGMENTORS = MODELS
+GENERATOR = MODELS
 
 
 def build_backbone(cfg):
@@ -33,6 +34,10 @@ def build_head(cfg):
 def build_loss(cfg):
     """Build loss."""
     return LOSSES.build(cfg)
+
+def build_generator(cfg):
+    """Build loss."""
+    return GENERATOR.build(cfg)
 
 
 def build_segmentor(cfg, train_cfg=None, test_cfg=None):

@@ -80,6 +80,7 @@ class HSIPNGDataset(CustomDataset):
         if idx < self.len_real:
             img_info = self.img_infos[idx]
             ann_info = self.get_ann_info(idx)
+            img_info['filename'] = img_info['filename'].replace('-L', '')
             results = dict(img_info=img_info, ann_info=ann_info)
             self.pre_pipeline(results)
         else:
@@ -87,6 +88,23 @@ class HSIPNGDataset(CustomDataset):
             ann_info = self.get_gan_ann_info(idx - self.len_real)
             results = dict(img_info=img_info, ann_info=ann_info)
             self.pre_gan_pipeline(results)
+        return self.pipeline(results)
+
+    def prepare_test_img(self, idx):
+        """Get testing data after pipeline.
+
+        Args:
+            idx (int): Index of data.
+
+        Returns:
+            dict: Testing data after pipeline with new keys introduced by
+                pipeline.
+        """
+
+        img_info = self.img_infos[idx]
+        img_info['filename'] = img_info['filename'].replace('-L', '')
+        results = dict(img_info=img_info)
+        self.pre_pipeline(results)
         return self.pipeline(results)
 
     def evaluate(self,
