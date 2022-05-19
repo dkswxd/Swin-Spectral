@@ -9,6 +9,7 @@ from .. import builder
 from ..builder import SEGMENTORS
 from .base import BaseSegmentor
 
+import time
 
 @SEGMENTORS.register_module()
 class EncoderDecoder(BaseSegmentor):
@@ -148,6 +149,8 @@ class EncoderDecoder(BaseSegmentor):
             loss_aux = self._auxiliary_head_forward_train(
                 x, img_metas, gt_semantic_seg)
             losses.update(loss_aux)
+
+        # time.sleep(5)
 
         return losses
 

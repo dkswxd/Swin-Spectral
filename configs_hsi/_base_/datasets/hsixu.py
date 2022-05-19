@@ -5,7 +5,7 @@ img_norm_cfg = dict(
     mean=[128]*32, std=[16]*32, to_rgb=False)
 crop_size = (256, 256)
 train_pipeline = [
-    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36),median_blur=False),
+    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36),median_blur=False,npy_transpose=True),
     dict(type='LoadAnnotations'),
     dict(type='Resize', img_scale=(320, 256), ratio_range=(0.5, 2.0)),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
@@ -33,16 +33,16 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=2,
-    workers_per_gpu=8,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='hdrx_dir',
         ann_dir='annx_dir',
-        gan_img_dir='crn_dir',
-        gan_ann_dir='annx_dir',
-        gan_split='splitx_dir/split_{}_train.txt',
-        gan_suffix='.npy',
+        gan_img_dir='unrefined_dir/image',
+        gan_ann_dir='unrefined_dir/label',
+        gan_split=None,
+        gan_suffix='.hdr',
         split='splitx_dir/split_{}_train.txt',
         pipeline=train_pipeline),
     val=dict(

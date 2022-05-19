@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsixpix2pix.py',
+    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsix.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 norm_cfg = dict(type='BN', requires_grad=True)
@@ -9,8 +9,8 @@ model = dict(
         depths=[2, 2, 18, 2],
         num_heads=[3, 6, 12, 24],
         window_size=(1, 7, 7),
-        window_size_spectral=(9, 1, 1),
-        patch_size=(4, 4, 4),
+        window_size_spectral=(33, 1, 1),
+        patch_size=(1, 4, 4),
         drop_path_rate=0.3,
         patch_norm=True,
         with_cp=True,
@@ -35,7 +35,7 @@ optimizer = dict(
     type='AdamW',
     lr=0.00006,
     betas=(0.9, 0.999),
-    weight_decay=0.01,
+    weight_decay=0.001,
     paramwise_cfg=dict(
         custom_keys={
             'absolute_pos_embed': dict(decay_mult=0.),
@@ -50,7 +50,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=1500,
     warmup_ratio=1e-6,
-    power=0.99999,
+    power=0.9999,
     min_lr=0.000006,
     by_epoch=False)
 

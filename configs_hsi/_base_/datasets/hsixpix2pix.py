@@ -5,7 +5,7 @@ img_norm_cfg = dict(
     mean=[128]*32, std=[16]*32, to_rgb=False)
 crop_size = (256, 256)
 train_pipeline = [
-    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36),median_blur=False,npy_transpose=True),
+    dict(type='LoadENVIHyperSpectralImageFromFile',channel_select=range(4,36),median_blur=False),
     dict(type='LoadAnnotations'),
     dict(type='Resize', img_scale=(320, 256), ratio_range=(0.5, 2.0)),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),

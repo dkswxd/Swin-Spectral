@@ -121,14 +121,11 @@ class LoadENVIHyperSpectralImageFromFile(object):
             img_bytes = load_ENVI_hyperspectral_image_from_file(filename)
         elif filename.endswith('npy'):
             img_bytes = np.load(filename)
-            if img_bytes.shape[0] == 1:
-                img_bytes = img_bytes[0]
-            if self.npy_transpose:
-                img_bytes = np.transpose(img_bytes, (1, 2, 0))
+            img_bytes = np.transpose(img_bytes, (1, 2, 0))
 
 
-
-        img_bytes = img_bytes[:, :, self.channel_select]
+        if img_bytes.shape[2] != len(self.channel_select):
+            img_bytes = img_bytes[:, :, self.channel_select]
         if self.to_float32:
             img_bytes = img_bytes.astype(np.float32)
             if self.normalization:

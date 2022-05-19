@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
+import random
 
 from .builder import DATASETS
 from .custom import CustomDataset
@@ -27,7 +28,8 @@ class HSIGANDataset(CustomDataset):
 
     PALETTE = [[0, 0, 0], [255, 255, 255]]
 
-    def __init__(self, split, gan_img_dir=None, gan_ann_dir=None, gan_split=None, gan_suffix=None, **kwargs):
+    def __init__(self, split, gan_img_dir=None, gan_ann_dir=None, gan_split=None, gan_suffix=None,
+                 fake_rate=0.2, **kwargs):
         super(HSIGANDataset, self).__init__(
             img_suffix='.hdr', seg_map_suffix='.png', split=split, **kwargs)
         assert osp.exists(self.img_dir) and self.split is not None
@@ -46,7 +48,9 @@ class HSIGANDataset(CustomDataset):
             self.gan_infos = self.load_annotations(self.gan_img_dir, self.gan_suffix,
                                                    self.gan_ann_dir, self.seg_map_suffix,
                                                    self.gan_split)
-            self.len_gan = len(self.gan_infos)
+            self.len_ganx = len(self.gan_infos)
+            self.fake_rate = fake_rate/(1 + fake_rate)
+            self.len_gan = int(self.fake_rate * len(self.img_infos))
         else:
             self.len_gan = 0
         self.len_real = len(self.img_infos)
@@ -86,8 +90,11 @@ class HSIGANDataset(CustomDataset):
             results = dict(img_info=img_info, ann_info=ann_info)
             self.pre_pipeline(results)
         else:
-            img_info = self.gan_infos[idx - self.len_real]
-            ann_info = self.get_gan_ann_info(idx - self.len_real)
+            random_idx = random.randint(0, self.len_ganx-1)
+            img_info = self.gan_infos[random_idx]
+            ann_info = self.get_gan_ann_info(random_idx)
+            # img_info = self.gan_infos[idx - self.len_real]
+            # ann_info = self.get_gan_ann_info(idx - self.len_real)
             results = dict(img_info=img_info, ann_info=ann_info)
             self.pre_gan_pipeline(results)
         return self.pipeline(results)

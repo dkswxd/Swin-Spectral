@@ -846,7 +846,7 @@ class SwinSpectralTransformer(BaseModule):
     def init_weights(self):
         if True:
         # if self.pretrained is None:
-            super().init_weights()
+        #     super().init_weights()
             # if self.use_abs_pos_embed:
             #     trunc_normal_init(self.absolute_pos_embed, std=0.02)
             for m in self.modules():

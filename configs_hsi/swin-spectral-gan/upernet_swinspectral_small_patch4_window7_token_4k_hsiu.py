@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsixpix2pix.py',
+    '../_base_/models/upernet_swinspectral.py', '../_base_/datasets/hsixu.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_4k.py'
 ]
 norm_cfg = dict(type='BN', requires_grad=True)
@@ -13,7 +13,7 @@ model = dict(
         patch_size=(4, 4, 4),
         drop_path_rate=0.3,
         patch_norm=True,
-        with_cp=True,
+        with_cp=False,
         in_channels=1,
         use_spectral_aggregation='Token'
     ),
@@ -33,9 +33,9 @@ model = dict(
 optimizer = dict(
     _delete_=True,
     type='AdamW',
-    lr=0.00006,
+    lr=0.0006,
     betas=(0.9, 0.999),
-    weight_decay=0.01,
+    weight_decay=0.001,
     paramwise_cfg=dict(
         custom_keys={
             'absolute_pos_embed': dict(decay_mult=0.),
@@ -50,8 +50,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=1500,
     warmup_ratio=1e-6,
-    power=0.99999,
-    min_lr=0.000006,
+    power=0.9999,
+    min_lr=0.00006,
     by_epoch=False)
 
 # By default, models are trained on 8 GPUs with 2 images per GPU
