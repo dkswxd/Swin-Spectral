@@ -12,7 +12,9 @@ model = dict(
     # generator_file='data/HSI/s50000_EMA.pth',
     # generator_file='data/HSI/s75000_EMA.pth',
     # generator_file='data/HSI/s100000_EMA.pth',
-    generator_file='data/HSI/s111000_EMA.pth',
+    # generator_file='data/HSI/s111000_EMA.pth',
+    generator_file='data/HSI/2n111000_EMA.pth',
+    # generator_file='data/HSI/2n100000_EMA.pth',
     backbone=dict(
         embed_dims=96,
         depths=[2, 2, 18, 2],
@@ -35,7 +37,8 @@ model = dict(
         in_channels=384,
         num_classes=2,
         norm_cfg=norm_cfg
-    ))
+    ),
+    generator=dict(type='OASIS_Generator',fix_3dnoise=True),)
 
 # AdamW optimizer, no weight decay for position embedding & layer norm
 # in backbone
@@ -59,8 +62,8 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=1500,
     warmup_ratio=1e-6,
-    power=1.0,
-    min_lr=0.0,
+    power=0.999,
+    min_lr=0.00006,
     by_epoch=False)
 
 # By default, models are trained on 8 GPUs with 2 images per GPU

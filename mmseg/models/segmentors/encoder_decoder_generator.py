@@ -149,9 +149,9 @@ class EncoderDecoderGenerator(BaseSegmentor):
             gt_semantic_segxx = gt_semantic_seg.clone()
             gt_semantic_segxx[gt_semantic_segxx==255]=0
             seg = seg.scatter_(1, gt_semantic_segxx, 1.0)
-            seg = F.interpolate(seg,scale_factor=0.5)
+            # seg = F.interpolate(seg,scale_factor=0.5)
             img_gen = self.generator(seg)
-            img_gen = F.interpolate(img_gen, scale_factor=2)
+            # img_gen = F.interpolate(img_gen, scale_factor=2)
             rand = torch.rand((bs, 1, 1, 1), device=img.device)
             rand[rand <  self.fake_rate] = 1 - rand[rand <  self.fake_rate]
             rand[rand >= self.fake_rate] = 1
@@ -267,6 +267,8 @@ class EncoderDecoderGenerator(BaseSegmentor):
         Returns:
             Tensor: The output segmentation map.
         """
+
+        img = F.instance_norm(img)
 
         assert self.test_cfg.mode in ['slide', 'whole']
         ori_shape = img_meta[0]['ori_shape']
