@@ -15,7 +15,8 @@ class OASIS_Generator(nn.Module):
                  z_dim=64,
                  no_3dnoise=False,
                  no_spectral_norm=False,
-                 param_free_norm='syncbatch'):
+                 param_free_norm='syncbatch',
+                 fix_3dnoise=False):
         super().__init__()
         self.z_dim = z_dim
         self.semantic_nc = semantic_nc
@@ -40,12 +41,20 @@ class OASIS_Generator(nn.Module):
         else:
             self.fc = nn.Conv2d(semantic_nc, 16 * ch, 3, padding=1)
 
+        self.fix_3dnoise = fix_3dnoise
+        if self.fix_3dnoise:
+            self.z = torch.randn(self.z_dim, dtype=torch.float32)
+
+
 
     def forward(self, input, z=None):
         seg = input
         if not self.no_3dnoise:
             dev = seg.get_device()
-            z = torch.randn(seg.size(0), self.z_dim, dtype=torch.float32, device=dev)
+            if self.fix_3dnoise:
+                z = self.z.expand(seg.size(0), self.z_dim).to(dev)
+            else:
+                z = torch.randn(seg.size(0), self.z_dim, dtype=torch.float32, device=dev)
             z = z.view(z.size(0), self.z_dim, 1, 1)
             z = z.expand(z.size(0), self.z_dim, seg.size(2), seg.size(3))
             seg = torch.cat((z, seg), dim = 1)

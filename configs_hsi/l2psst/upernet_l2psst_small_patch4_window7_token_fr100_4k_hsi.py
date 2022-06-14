@@ -5,8 +5,7 @@ _base_ = [
 norm_cfg = dict(type='BN', requires_grad=True)
 model = dict(
     fake_rate=1.0,
-    # generator_file='data/HSI/25000_EMA.pth',
-    # generator_file='data/HSI/186000_EMA.pth',
+    # generator_file='data/HSI/25000_EMA.pth',    # generator_file='data/HSI/186000_EMA.pth',
     # generator_file='data/HSI/140000_EMA.pth',
     # generator_file='data/HSI/102000_EMA.pth',
     generator_file='data/HSI/s50000_EMA.pth',
