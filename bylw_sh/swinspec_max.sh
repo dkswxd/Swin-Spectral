@@ -1,0 +1,1 @@
+python tools/test_folds.py configs_hsi/swin-spectral/upernet_swinspectral_small_patch4_window7_max_4k_hsi.py bylw/upernet_swinspectral_small_patch4_window7_max_4k_hsi_fold{}/latest.pth --eval mIoU mDice --folds=5
